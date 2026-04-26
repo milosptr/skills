@@ -64,7 +64,7 @@ From *The Pragmatic Programmer* and Martin Fowler's Rule of Three. DRY is about 
 These skills close the loop before declaring work shippable.
 
 ### defining-done
-> Verify a task is truly complete before declaring it done — tests pass, types check, lint passes, SPEC acceptance criteria are met, no debug code or stray TODOs remain, edge cases are handled, behavior matches the spec, and no scope creep was smuggled in.
+> Verify a task is truly complete before declaring it done — tests pass, types check, lint passes, acceptance criteria are met (from a SPEC if present, otherwise the explicit list derived from the request), no debug code or stray TODOs remain, edge cases are handled, and no scope creep was smuggled in.
 
 From Boris Cherny's "would a staff engineer approve this?" rule, run by the implementer as a self-check before opening a PR. Premature completion claims are the most common silent AI failure; this skill is the gate that catches them.
 
