@@ -15,22 +15,22 @@ A different skill — `reviewing-as-staff-engineer` — does the same kind of sk
 
 Run this before declaring any non-trivial implementation complete.
 
-1. **Pull up the SPEC and PLAN** if they exist (`SPEC.md`, `PLAN.md`, or the original request). The acceptance criteria there are the canonical definition of done — not your sense of "this seems to work."
-2. **Run the full feedback loop, not the partial one.** Tests (all of them, not just the new one), typecheck, lint, and any project-specific checks from CONTEXT.md. If any fail, you are not done.
-3. **Walk the acceptance criteria one by one.** For each item in the SPEC's acceptance criteria, point at the test or behavior that proves it. If you can't, you are not done.
-4. **Check the SPEC's edge cases section.** Each edge case should have a test or a documented decision (e.g., "deferred to a follow-up — see Open questions"). If an edge case is silently unimplemented, you are not done.
+1. **Pull up the canonical definition of done.** Look for `SPEC.md` and `PLAN.md`; if either is present, its acceptance criteria are the contract. If neither exists, derive an explicit acceptance list from the user's original request and any clarifications in this session — and write it down so the walk-through in step 3 has something to check against. Don't substitute "this seems to work" for an explicit list.
+2. **Run the full feedback loop, not the partial one.** Tests (all of them, not just the new one), typecheck, lint, and any project-specific checks (from `CONTEXT.md` if present, otherwise discovered from `package.json`/`Makefile`/`pyproject.toml` or asked of the user). If any fail, you are not done.
+3. **Walk the acceptance criteria one by one.** For each item — from the SPEC if one exists, otherwise from the list you wrote in step 1 — point at the test or behavior that proves it. If you can't, you are not done.
+4. **Check edge cases.** If a SPEC exists, walk its edge cases section. Otherwise, walk the obvious failure modes for this change (empty input, oversized input, partial failure, concurrent access, idempotency — whichever apply). Each should have a test or a documented decision (e.g., "deferred to a follow-up"). If an edge case is silently unimplemented, you are not done.
 5. **Diff yourself.** Look at the actual diff — every changed file, every added line. Look for the failure modes listed below.
-6. **Resolve or transfer Open questions.** If the SPEC had open questions, each one should either be answered (and the answer reflected in the implementation) or carried forward into a tracked follow-up. Silently ignoring them is not done.
+6. **Resolve or transfer Open questions.** If the SPEC (or your in-session clarifications) had open questions, each one should either be answered and reflected in the implementation, or carried forward into a tracked follow-up. Silently ignoring them is not done.
 7. **Produce a Done Statement** (format below). If anything is missing, the statement is "NOT done — here's what's missing." If everything checks out, the statement is "Done — here are the verifications I ran."
 
 ## Rules
 
-- **Tests passing is necessary, not sufficient.** Tests pass when the test you wrote matches the code you wrote. They don't verify the SPEC was implemented; they verify your implementation matches your test. The SPEC walk-through is the check that matters.
+- **Tests passing is necessary, not sufficient.** Tests pass when the test you wrote matches the code you wrote. They don't verify the acceptance criteria were implemented; they verify your implementation matches your test. The criteria walk-through (against the SPEC if present, otherwise against the explicit list derived from the request) is the check that matters.
 - **Run the full suite, not just the file you touched.** AI changes routinely pass their local test while breaking tests elsewhere. The full suite is the only honest check.
 - **Refuse to mark done falsely.** If the user says "just call it done, we'll fix it later," push back with specifics: "The acceptance criterion 'handles empty cart' has no test and no implementation. Marking done means we ship that gap. Want me to add a test, or document it as a known follow-up?"
 - **Don't conflate "works on the happy path" with "done."** The happy path is the easiest 20% of done. Edge cases, errors, and the behaviors-must-not-change list are most of the work.
 - **Prefer hooks for deterministic checks.** If a project doesn't have pre-commit hooks running lint/format/typecheck, recommend setting them up — those checks should be enforced, not just remembered.
-- **Treat "Open questions" in the SPEC as required reading.** Many AI-implemented features ship with the SPEC's open questions silently unresolved. That's a known failure mode; this skill catches it.
+- **Treat open questions as required reading when present.** If the SPEC (or the in-session clarifications) listed open questions, none of them should ship silently unresolved. Many AI-implemented features fail here; this skill catches it.
 - **Don't add scope while verifying.** If you find a bug while running the done-check, note it and finish the check. Mixing in unrelated fixes during verification means the done-check doesn't end. Bugs found go on the follow-up list.
 
 ## Failure modes to look for in the diff
@@ -40,8 +40,8 @@ Run this before declaring any non-trivial implementation complete.
 - **TODOs added in this diff.** A TODO from before is fine; a TODO you just wrote is unfinished work in disguise. Either resolve it or file it.
 - **`any` casts (TypeScript), `# type: ignore` (Python), `unwrap()` chains (Rust).** Anywhere the type system was bypassed to make the code compile. Each one is a potential bug.
 - **Magic literals.** Numbers or strings that escaped getting names. If the SPEC said "30 days" and the code has a bare `30`, that's a Replace Magic Number with Named Constant waiting to happen.
-- **Inconsistent naming with `UBIQUITOUS_LANGUAGE.md`.** New code that uses non-canonical terms re-introduces drift. Check the glossary.
-- **Files touched outside the planned scope.** If `PLAN.md` named the affected modules and you touched something else, either the plan was wrong or you scoped-crept. Either is worth flagging.
+- **Inconsistent naming with the project's domain vocabulary.** If `UBIQUITOUS_LANGUAGE.md` exists, check it for canonical terms. If not, check that new identifiers match the terminology already used in the surrounding code; new code introducing fresh synonyms re-introduces drift.
+- **Files touched outside the planned scope.** If `PLAN.md` named the affected modules, anything you touched outside that list is either a wrong plan or scope creep — flag it. If no plan exists, sanity-check the diff against the original request: are these the files a reasonable implementation would have touched?
 - **New dependencies added.** Any new package in `package.json`, `pyproject.toml`, etc. should match the plan. Surprise dependencies have license, security, and maintenance implications.
 - **Generated code modified by hand.** Anything in `generated/`, `gen/`, `*.generated.*` should not appear in your diff. If it does, you're patching something that will get overwritten.
 
@@ -55,7 +55,7 @@ Produce one of these two:
 ## Done Statement
 
 **Task:** <one line — what was implemented>
-**Source:** <SPEC.md path, PLAN.md path, or "user request">
+**Source:** <SPEC.md path if present, PLAN.md path if present, or "user request" with a one-line summary of the explicit acceptance list>
 
 **Verifications run:**
 - [x] Full test suite: <N tests pass, 0 fail>
@@ -64,23 +64,23 @@ Produce one of these two:
 - [x] Format: clean (or: handled by pre-commit hook)
 - [x] <project-specific check, e.g., "DB migrations apply cleanly">
 
-**Acceptance criteria walk-through:**
-- [x] <Criterion 1 from SPEC> → verified by test `<test name>` in `<file>`
-- [x] <Criterion 2 from SPEC> → verified by manual test: <what you ran and observed>
+**Acceptance criteria walk-through:** (criteria from the SPEC if present, otherwise from the explicit list derived from the request)
+- [x] <Criterion 1> → verified by test `<test name>` in `<file>`
+- [x] <Criterion 2> → verified by manual test: <what you ran and observed>
 - ...
 
 **Edge cases:**
-- [x] <Edge case 1 from SPEC> → handled by `<code reference>`, tested by `<test reference>`
-- [x] <Edge case 2 from SPEC> → deferred (see Follow-ups)
+- [x] <Edge case 1> → handled by `<code reference>`, tested by `<test reference>`
+- [x] <Edge case 2> → deferred (see Follow-ups)
 
-**Open questions resolved:**
-- <Q1 from SPEC>: answered as <A>, reflected in <code reference>
-- <Q2 from SPEC>: deferred — filed as <ticket/note>
+**Open questions resolved:** (omit if there were none)
+- <Q1>: answered as <A>, reflected in <code reference>
+- <Q2>: deferred — filed as <ticket/note>
 
 **Diff hygiene:**
 - No debug code, no commented-out blocks, no new TODOs, no type-system bypasses.
-- Files changed match `PLAN.md` scope.
-- No new dependencies (or: <dep> added, matches plan).
+- Files changed match `PLAN.md` scope (or, if no plan: match the scope a reasonable implementation of the request would touch).
+- No new dependencies (or: <dep> added, matches plan/request).
 
 **Follow-ups (not blocking done):**
 - <issue or note for things deliberately deferred>
@@ -92,7 +92,7 @@ Produce one of these two:
 ## NOT Done — Missing Items
 
 **Task:** <one line>
-**Source:** <SPEC/PLAN/request>
+**Source:** <SPEC.md / PLAN.md / "user request" — whichever was canonical>
 
 **Blocking gaps:**
 - <Acceptance criterion X> has no test and no implementation
@@ -109,17 +109,17 @@ I have not run the Done Statement; the work is not yet complete.
 ## Anti-patterns to refuse
 
 - **"Tests pass, ship it."** Refuse. Tests passing is one of ten checks, not the whole check.
-- **"The SPEC's edge cases are nice-to-haves; the main path works."** Refuse. The SPEC's acceptance criteria are the contract. Edge cases listed in the SPEC are not nice-to-haves; they're requirements with a different name.
+- **"The edge cases are nice-to-haves; the main path works."** Refuse. Acceptance criteria — whether from the SPEC or from the explicit list derived from the request — are the contract. Edge cases listed there are not nice-to-haves; they're requirements with a different name.
 - **Marking done with known TODOs in your own diff.** Refuse. Either resolve them or move them to a follow-up list with a real artifact (issue, note, ticket).
 - **Skipping the full-suite test run because "I only changed one file."** Refuse. The full suite catches the cross-file breakage that makes AI implementations dangerous.
-- **Silently dropping Open questions from the SPEC.** Refuse. Each one needs a documented disposition: answered, deferred-with-ticket, or escalated to the user.
+- **Silently dropping open questions.** Refuse. Whether the questions came from a SPEC or from in-session clarifications, each one needs a documented disposition: answered, deferred-with-ticket, or escalated to the user.
 
 ## Integration with hooks
 
 For the deterministic parts of "done" — lint, format, typecheck, secret scan — pre-commit hooks are the right enforcement mechanism. They run every time and don't depend on memory. If the project doesn't have them, point at `setup-pre-commit` (Pocock's skill, or the project's existing tooling) and recommend it.
 
 This skill handles the *judgment* parts that hooks can't:
-- Did you implement what the SPEC said?
+- Did you implement what was actually asked for (per the SPEC if present, or per the explicit acceptance list derived from the request)?
 - Did you handle the edge cases?
 - Did you resolve the open questions?
 - Did the diff stay within scope?

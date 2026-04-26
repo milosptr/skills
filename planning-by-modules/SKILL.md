@@ -1,6 +1,6 @@
 ---
 name: planning-by-modules
-description: Convert a SPEC, PRD, or feature request into a module-level implementation plan that names affected modules, designs their public interfaces, lists internal changes, identifies dependencies and risks, and specifies tests at each boundary. Save to PLAN.md. Use after clarifying-intent produces a SPEC, before any implementation, and any time work touches more than two modules. Skip for single-file changes.
+description: Convert a SPEC, PRD, or feature request into a module-level implementation plan that names affected modules, designs their public interfaces, lists internal changes, identifies dependencies and risks, and specifies tests at each boundary. Save to PLAN.md. Use before any implementation that touches more than two modules. Works from a SPEC.md when one exists; otherwise plans directly from the user's stated request. Skip for single-file changes.
 ---
 
 # Planning by Modules
@@ -11,8 +11,8 @@ A good plan answers: which modules change, what their public interfaces look lik
 
 ## Process
 
-1. **Read the input.** Look for `SPEC.md` or `docs/specs/<slug>.md`. If none exists, ask the user for the request and run `clarifying-intent` first instead — don't plan from a vague brief.
-2. **Read CONTEXT.md if present** to anchor module names and existing patterns. If absent and the codebase is unfamiliar, run `mapping-codebase` first.
+1. **Read the input.** Look for `SPEC.md`, `docs/specs/<slug>.md`, or any similar specification document. If present, treat it as the canonical input. If absent, work from the user's stated request — but if the request is too vague to plan from (you'd be guessing at acceptance criteria, scope, or constraints), pause and ask the user clarifying questions before continuing. Running `clarifying-intent` first to produce a SPEC is one good option; a short inline Q&A is another.
+2. **Anchor module names and existing patterns.** If `CONTEXT.md` (or similar architecture doc) exists, read it. If absent and the codebase is unfamiliar, briefly survey the relevant modules — entry points, the affected files, and adjacent tests — before planning. (If you find yourself doing extensive discovery, `mapping-codebase` is the dedicated skill for producing a reusable map.)
 3. **Identify affected modules.** Group changes by module, not file. A module is a unit with a public interface and shared internal state — directories like `src/billing/` typically map to modules; loose utilities don't.
 4. **For each affected module, design the interface change before the implementation.** What does the module expose after the change? What stays internal? An interface is the smallest possible surface that lets callers do what they need.
 5. **Apply Ousterhout's red flags** (see Rules below). Stop and revise if you see them.
@@ -32,7 +32,7 @@ A good plan answers: which modules change, what their public interfaces look lik
 - **Watch for temporal decomposition.** Red flag: modules organized by *when* operations happen (`Step1`, `Step2`, `Step3`) rather than *what knowledge they own*. Reorganize by knowledge.
 - **Pull complexity downwards.** If a choice can be made inside a module, make it there — don't push it to callers via configuration parameters they all have to set the same way.
 - **Plan tests at module boundaries, not internals.** Tests that exercise the public interface survive refactors; tests that mock private methods break with every change.
-- **If the interface design is non-trivial, run `designing-it-twice` first.** Generate two or three radically different interface options before committing to one.
+- **If the interface design is non-trivial, consider `designing-it-twice` first.** Generating two or three radically different interface options before committing to one tends to pay off when the right shape isn't obvious.
 - **Don't write code in this skill.** It produces a plan, not an implementation.
 
 ## Output Format
@@ -42,7 +42,7 @@ Write `PLAN.md` at the project root with this structure:
 ```
 # PLAN: <one-line title>
 
-**Source:** <SPEC.md path or short description of request>
+**Source:** <SPEC.md path if one exists, otherwise short description of the user's request>
 **Date:** YYYY-MM-DD
 **Status:** Draft | Confirmed
 

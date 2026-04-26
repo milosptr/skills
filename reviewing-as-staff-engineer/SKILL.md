@@ -14,16 +14,15 @@ A different skill — `defining-done` — is the implementer's self-check before
 ## Process
 
 1. **Refuse if context is contaminated.** If the current session wrote any of the code being reviewed, stop. Tell the user: "I wrote some of this — my judgment is biased. Start a fresh session and have that Claude review." Then stop. This is the most important rule of the skill.
-2. **Read the artifacts that ground the review:**
-   - `SPEC.md` — the contract the implementation must satisfy
-   - `PLAN.md` — the module-level plan, including scope
-   - `CONTEXT.md` — landmines, conventions, hard rules
-   - `UBIQUITOUS_LANGUAGE.md` — canonical vocabulary
-   - The diff itself
-3. **Read the diff once for shape.** What's the change at a high level? Which modules changed? Does the scope match `PLAN.md`?
+2. **Read whatever artifacts exist to ground the review.** The diff itself is mandatory; the rest are informative if present:
+   - `SPEC.md` — the contract the implementation must satisfy. If absent, derive an explicit acceptance list from the original request (PR description, commit messages, linked issue, or what the user tells you the diff is supposed to do) and review against that. If even that's unclear, say so in the review and ask the user before proceeding.
+   - `PLAN.md` — the module-level plan, including scope. If absent, infer expected scope from the description of the change.
+   - `CONTEXT.md` — landmines, conventions, hard rules. If absent, review against conventions visible in the surrounding code.
+   - `UBIQUITOUS_LANGUAGE.md` — canonical vocabulary. If absent, check naming consistency against terminology already used in the affected modules.
+3. **Read the diff once for shape.** What's the change at a high level? Which modules changed? Does the scope match `PLAN.md` (or, if no plan, the stated intent of the change)?
 4. **Read the diff a second time for risk.** Walk the review lenses below. For each, note specific concerns with file:line references.
 5. **Run the code mentally and operationally.** What happens under load? Under concurrent access? Under partial failure? At scale? At zero?
-6. **Check that the SPEC's acceptance criteria are actually verified by the diff.** Each criterion should map to a test or observable behavior.
+6. **Check that the acceptance criteria are actually verified by the diff.** Walk the SPEC's criteria if one exists; otherwise walk the list you derived in step 2. Each criterion should map to a test or observable behavior.
 7. **Check the diff hygiene** — debug code, TODOs, type bypasses, scope creep — same list as `defining-done`. The implementer should have caught these; the reviewer catches what slipped through.
 8. **Tag every comment by severity** (Blocker / Consideration / Nit) so the implementer can triage.
 9. **Output the review** in the format below. Be direct. Be specific. Cite file:line.
@@ -32,21 +31,21 @@ A different skill — `defining-done` — is the implementer's self-check before
 ## Rules
 
 - **Fresh context only.** If you wrote the code, you cannot review it. Refuse.
-- **Anchor in artifacts.** A review against `SPEC.md` and `PLAN.md` is grounded; a review against your own taste is noise. If the SPEC is missing, say so — don't invent acceptance criteria.
+- **Anchor in something explicit, not in your taste.** A review against `SPEC.md` and `PLAN.md` is grounded; a review against your own taste is noise. If those don't exist, anchor in the original request (PR description, linked issue, or what the user tells you the diff is supposed to do) and state in the review what you anchored against. Don't invent acceptance criteria silently.
 - **Be specific.** "This looks fragile" is not a review comment. "Line 42: `parseInt(userInput)` will return `NaN` for empty string and is then compared with `>=`, which is always false — empty input silently routes to the default branch. Add an explicit empty-input check or use `Number(userInput)` and validate with `isFinite`" is a review comment.
 - **Tag severity.** Every comment is **Blocker**, **Consideration**, or **Nit**. Without tags, every comment looks equal weight.
 - **Refuse sycophancy.** Don't open the review with "great work, just a few small things." Open with the disposition. Praise that has no effect on the merge decision is noise.
 - **Don't hide blockers.** If something must be fixed before merge, say "Blocker" plainly and explain the consequence. Don't soften with hedges.
-- **Look for what the diff doesn't include.** A review of what's there misses the change that should have been made and wasn't. Check the SPEC for unimplemented criteria and the test directory for missing coverage.
-- **Distinguish "wrong" from "different from how I'd do it."** Style preferences are nits, not blockers. A pattern that violates a documented convention in CONTEXT.md is a Consideration. A bug, a security gap, or a design regression is a Blocker.
+- **Look for what the diff doesn't include.** A review of what's there misses the change that should have been made and wasn't. Check the acceptance criteria (from the SPEC if present, otherwise from the derived list) for unimplemented items, and the test directory for missing coverage.
+- **Distinguish "wrong" from "different from how I'd do it."** Style preferences are nits, not blockers. A pattern that violates a documented convention (in `CONTEXT.md` if present, or otherwise visible in the surrounding code) is a Consideration. A bug, a security gap, or a design regression is a Blocker.
 
 ## The review lenses
 
 Walk these in order. For each, look for specific concerns and tag severity.
 
-### 1. Correctness against the SPEC
+### 1. Correctness against the stated intent
 
-Does the diff actually do what the SPEC says? Walk each acceptance criterion and point at the code or test that satisfies it. Look for off-by-one errors, null/undefined paths, type-coercion surprises, and gaps between what the code *appears* to do and what it actually does.
+Does the diff actually do what was asked? Walk each acceptance criterion — from the SPEC if one exists, otherwise from the list you derived from the request — and point at the code or test that satisfies it. Look for off-by-one errors, null/undefined paths, type-coercion surprises, and gaps between what the code *appears* to do and what it actually does.
 
 ### 2. Failure modes
 
@@ -58,7 +57,7 @@ Injection vectors (SQL, command, template). Authorization gaps — could user A 
 
 ### 4. Design regression
 
-Shallow modules introduced where deep ones existed (Ousterhout)? Information previously hidden now exposed? Pass-through methods adding interface cost without functionality? Duplicated patterns where an existing abstraction would serve? Naming aligned with `UBIQUITOUS_LANGUAGE.md`?
+Shallow modules introduced where deep ones existed (Ousterhout)? Information previously hidden now exposed? Pass-through methods adding interface cost without functionality? Duplicated patterns where an existing abstraction would serve? Naming consistent with the project's domain vocabulary — `UBIQUITOUS_LANGUAGE.md` if it exists, otherwise the terminology already established in the surrounding code?
 
 ### 5. Operability
 
@@ -70,7 +69,7 @@ Tests verify behavior through public interfaces, not implementation details. Fai
 
 ### 7. Diff hygiene
 
-Debug code, commented-out blocks, new TODOs, type system bypasses (`any`, `# type: ignore`, `unwrap()`), magic literals, scope creep beyond `PLAN.md`, surprise dependencies.
+Debug code, commented-out blocks, new TODOs, type system bypasses (`any`, `# type: ignore`, `unwrap()`), magic literals, scope creep beyond `PLAN.md` (or, if no plan exists, beyond what the stated intent of the change required), surprise dependencies.
 
 ### 8. Maintainability
 
@@ -81,7 +80,7 @@ Understandable in six months without the context the implementer had? Comments e
 ```
 # Review: <PR title or one-line description of diff>
 
-**Reviewer context:** Fresh session. Read SPEC.md, PLAN.md, CONTEXT.md, and the diff. Did not write any of the code being reviewed.
+**Reviewer context:** Fresh session. Read the diff and whichever of `SPEC.md`, `PLAN.md`, `CONTEXT.md`, `UBIQUITOUS_LANGUAGE.md` exist (list them; if none, state what was used as the anchor — PR description, linked issue, user-stated intent). Did not write any of the code being reviewed.
 
 **Disposition:** Block / Request Changes / Approve
 
@@ -112,11 +111,11 @@ Small style or polish items. Optional.
 
 ## What's missing from the diff
 
-Things the SPEC or PLAN required that the diff doesn't address.
+Things the stated intent required that the diff doesn't address. If a SPEC/PLAN exists, walk those; otherwise walk the acceptance list derived from the request.
 
-- <Acceptance criterion X from SPEC has no test or implementation>
-- <Edge case "<empty input>" is in the SPEC but not handled in code>
-- <Open question Q from SPEC was not resolved in this diff or in a follow-up>
+- <Acceptance criterion X has no test or implementation>
+- <Edge case "<empty input>" was expected but not handled in code>
+- <Open question Q was not resolved in this diff or in a follow-up>
 
 Omit this section if nothing is missing.
 
@@ -135,9 +134,9 @@ Omit this section if there's nothing specific to call out.
 - **Generic praise to soften the review.** Refuse. "Looks good overall, just a few things..." is sycophancy disguised as politeness. Open with the disposition.
 - **Hedging blockers.** Refuse. If something must be fixed, say "Blocker" — not "you might want to consider possibly looking at..."
 - **Reviews without file:line references.** Refuse. Vague reviews are useless. Cite specifics.
-- **Reviews that don't read the SPEC.** Refuse. Reviewing against your own taste produces noise. The SPEC is the contract.
+- **Reviews with no anchor.** Refuse. Reviewing against your own taste produces noise. Anchor in the SPEC if it exists, otherwise in the explicit acceptance list derived from the request — and state in the review which you used.
 - **Equally-weighted comment lists.** Refuse. Without severity tags, the implementer can't triage. Every review comment must be Blocker, Consideration, or Nit.
-- **Skipping the "what's missing" check.** Refuse. The SPEC has acceptance criteria; the review must verify each one is covered. Omitting this lets ghost requirements ship.
+- **Skipping the "what's missing" check.** Refuse. Whatever you anchored against has acceptance criteria; the review must verify each one is covered. Omitting this lets ghost requirements ship.
 
 ## Post-output instruction
 

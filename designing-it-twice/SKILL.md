@@ -1,6 +1,6 @@
 ---
 name: designing-it-twice
-description: Generate two or three radically different interface designs for a module, each under a different design constraint, then compare and let the user pick. Counters AI's tendency to commit to the first plausible interface. Use before implementing a new module's public interface, when an existing interface feels wrong but the right shape isn't obvious, or when the user mentions "design it twice" or "design alternatives". Skip for trivial interfaces (a single function with obvious signature) or after the interface is already locked in a SPEC.
+description: Generate two or three radically different interface designs for a module, each under a different design constraint, then compare and let the user pick. Counters AI's tendency to commit to the first plausible interface. Use before implementing a new module's public interface, when an existing interface feels wrong but the right shape isn't obvious, or when the user mentions "design it twice" or "design alternatives". Skip for trivial interfaces (a single function with obvious signature) or when the interface shape is already locked in.
 ---
 
 # Designing It Twice
@@ -13,7 +13,7 @@ This is a thinking skill, not an implementation skill. No code under the propose
 
 ## Process
 
-1. **Gather requirements.** Before designing, confirm what the module needs to do, who calls it, what the key operations are, and what should be hidden inside vs exposed. If a SPEC.md exists, read it. If not, ask the user briefly — don't run a full `clarifying-intent`-style interrogation here, that's a different skill.
+1. **Gather requirements.** Before designing, confirm what the module needs to do, who calls it, what the key operations are, and what should be hidden inside vs exposed. If `SPEC.md` (or any similar specification document) exists, read it. If not, ask the user briefly — don't run a full `clarifying-intent`-style interrogation here, that's a different skill.
 2. **Generate designs in parallel** using sub-agents (Task tool) when available. Each sub-agent gets the same requirements and a *different* constraint (see below). Run them simultaneously to prevent contamination.
 3. **If sub-agents aren't available**, generate sequentially with deliberate amnesia: write design 1, then explicitly start design 2 with "Now ignore everything in design 1 and approach this from constraint X." Sequential is worse than parallel — alternatives drift toward the first design — but it's better than not designing twice.
 4. **Use radically different constraints.** Examples:

@@ -1,6 +1,6 @@
 ---
 name: tdd-with-feedback-loops
-description: Implement features or fixes using test-first development with strict vertical slicing — one failing test, smallest passing change, then typecheck and lint and tests as the full feedback loop, then refactor. Use when implementing any non-trivial logic, when fixing bugs that need a regression test, when working in unfamiliar code, or after planning-by-modules produces a PLAN.md. Skip for typo fixes, dependency bumps, or one-line changes.
+description: Implement features or fixes using test-first development with strict vertical slicing — one failing test, smallest passing change, then typecheck and lint and tests as the full feedback loop, then refactor. Use when implementing any non-trivial logic, when fixing bugs that need a regression test, or when working in unfamiliar code. Works equally well from a PLAN.md or directly from a clear user request. Skip for typo fixes, dependency bumps, or one-line changes.
 ---
 
 # TDD with Feedback Loops
@@ -35,7 +35,7 @@ Vertical slicing: one test → one implementation → one feedback loop → repe
 - **One test per cycle.** Writing two tests before implementing means you're committing to a structure before you've validated it. Slice vertically.
 - **Minimal code per cycle.** If passing the test took 50 lines of new code, the test was too big. Split it.
 - **No speculative features.** "While I'm here, I'll also add..." is how AI implementations balloon. The next test will tell you if more is needed.
-- **Stop and ask if you don't know enough to write the test.** Tests written without understanding the behavior become tautologies — "function returns 5 when called with 5" tells you nothing. If the SPEC or PLAN didn't tell you what behavior to expect, ask the user.
+- **Stop and ask if you don't know enough to write the test.** Tests written without understanding the behavior become tautologies — "function returns 5 when called with 5" tells you nothing. If neither the user's request nor any available SPEC/PLAN tells you what behavior to expect, ask the user.
 
 ## What good and bad tests look like
 
@@ -72,9 +72,9 @@ This test breaks when you rename `calculatePricing`, when you move pricing inlin
 
 Before writing the first test, confirm:
 
-- [ ] I know which public interface this behavior is exposed through. If unclear, run `planning-by-modules` first.
+- [ ] I know which public interface this behavior is exposed through. If unclear, ask the user briefly to confirm — or, for a multi-module change, consider `planning-by-modules` to design the surface first.
 - [ ] I have a list of behaviors to implement, ordered (most foundational first).
-- [ ] I know the build, test, lint, and typecheck commands. If unclear, check CONTEXT.md or `mapping-codebase`.
+- [ ] I know the build, test, lint, and typecheck commands. If `CONTEXT.md` (or similar) exists, check it; otherwise discover them from `package.json`/`Makefile`/`pyproject.toml` or ask the user.
 - [ ] I have agreed with the user on which behaviors are critical to test versus nice-to-have. You can't test everything; focus on what matters.
 
 ## Per-cycle checklist
@@ -112,4 +112,4 @@ Don't keep the spike code and retroactively write tests. The tests will follow t
 
 After completing a session of TDD work, summarize:
 
-> Implemented N behaviors via N RED-GREEN cycles. All tests, typecheck, and lint pass. New tests in: <files>. The remaining behaviors from PLAN.md not yet implemented: <list>.
+> Implemented N behaviors via N RED-GREEN cycles. All tests, typecheck, and lint pass. New tests in: <files>. Remaining behaviors not yet implemented: <list> (drawn from PLAN.md if one exists, otherwise from the original request).

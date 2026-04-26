@@ -15,7 +15,7 @@ The skill does not find smells — that's `improve-codebase-architecture` or a c
 
 For each smell or improvement:
 
-1. **Name the transformation before doing it.** "I'm going to Extract Function on lines 42–58 into `validatePayload`." If you can't name it, you don't have a refactoring — you have a rewrite. Stop and run `planning-by-modules` instead.
+1. **Name the transformation before doing it.** "I'm going to Extract Function on lines 42–58 into `validatePayload`." If you can't name it, you don't have a refactoring — you have a rewrite. Stop. For a rewrite that crosses module boundaries, `planning-by-modules` is the right next step; for a smaller behavior change, plan it as a deliberate change with its own test rather than disguising it as cleanup.
 2. **Run tests. Confirm green.** If tests are red before you start, refactoring is not safe. Make them green first, or run `characterizing-legacy` to add coverage before refactoring.
 3. **Apply the transformation.** Make the smallest mechanical change that achieves the named refactoring.
 4. **Run tests immediately.** All of them, not just the file you touched. Run typecheck and lint too.
@@ -60,7 +60,7 @@ These are higher-level than Fowler's transformations and often map onto sequence
 - **Hide information.** Stop exposing a field or implementation detail through the interface. Often Encapsulate Variable then Move Function.
 - **Pull complexity downwards.** Make the caller's life simpler at the cost of more logic inside the module. Often Inline (at the callsite) then Extract (inside the module).
 - **Eliminate a pass-through method.** Delete a method that does nothing but call another with the same signature. Inline Function on every callsite.
-- **Define errors out of existence.** Change an interface so the error case can't occur. Heavier than a refactoring — often crosses into design change. If it does, stop and use `planning-by-modules`.
+- **Define errors out of existence.** Change an interface so the error case can't occur. Heavier than a refactoring — often crosses into design change. If it does, stop and treat it as a planned design change (running `planning-by-modules` is one good option) rather than as a behavior-preserving refactor.
 
 ## Example: Extract Function, step by step
 
@@ -104,7 +104,7 @@ Test the change: every test that exercises `processOrder` continues to pass. No 
 - **Batched refactorings without test runs between.** Refuse. The point of refactoring discipline is the green checkpoint between steps.
 - **Refactoring without tests.** If the code has no tests, you cannot verify behavior preservation. Run `characterizing-legacy` first.
 - **"Just clean it up while you're there."** Mixing a behavior change with a refactoring in the same commit means you can no longer tell which broke the test. Separate them.
-- **Renaming without consulting `UBIQUITOUS_LANGUAGE.md`.** If the project has a glossary, refactoring renames must align with it. If they don't, update the glossary first.
+- **Renaming away from the project's domain vocabulary.** If `UBIQUITOUS_LANGUAGE.md` exists, refactoring renames must align with it (update the glossary first if they shouldn't). If no glossary exists, align with the terminology already established in the surrounding code.
 
 ## Post-output instruction
 

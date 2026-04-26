@@ -44,7 +44,7 @@ When you flag duplication, name the category. It tells the user not just *what* 
 - **The same knowledge is not the same shape.** Two callsites may compute the same business rule with different code (one uses a loop, one uses `reduce`). They are duplicates *of knowledge* and should be unified, even though they look different.
 - **Apply the Rule of Three.** Two appearances are not yet duplication; they're a pair. By three, the pattern is established and extraction is justified. Premature extraction creates fake abstractions that future changes fight.
 - **Forecast change. If A and B are duplicates today but will evolve in different directions tomorrow, don't unify.** Knowledge that *belongs together* changes together; knowledge that doesn't, doesn't.
-- **Name the extracted abstraction in the domain language, not by shape.** A function called `processItems` is a shape-extraction. A function called `applyShippingFee` is a knowledge-extraction. If you can't name it in the domain (`UBIQUITOUS_LANGUAGE.md`), you probably haven't found real knowledge — reconsider extracting.
+- **Name the extracted abstraction in the domain language, not by shape.** A function called `processItems` is a shape-extraction. A function called `applyShippingFee` is a knowledge-extraction. If you can't name it in the domain — using `UBIQUITOUS_LANGUAGE.md` if it exists, otherwise the terminology already established in the surrounding code — you probably haven't found real knowledge. Reconsider extracting.
 - **Don't extract across module boundaries lightly.** Two modules sharing a private helper means they share a dependency. Sometimes the right fix is to leave the duplication and let each module own its version. Information sharing has cost.
 - **Test-guarded extraction.** Once you decide to unify, run `refactoring-patterns` for the actual transformation. Tests stay green between every step.
 
@@ -143,7 +143,7 @@ End with a summary line: `Found N suspected duplications. M confirmed for extrac
 
 ## Integration with other skills
 
-- **`mapping-codebase`** runs first if the codebase is unfamiliar — you can't judge inadvertent duplication without knowing what already exists.
+- **`mapping-codebase`** is worth running first if the codebase is unfamiliar — you can't judge inadvertent duplication without knowing what already exists. If you don't run it, do at least a brief survey of the relevant modules before flagging duplication, so "no existing abstraction exists" is a checked claim rather than an assumption.
 - **`ubiquitous-language`** provides the domain names for proposed extractions. If a glossary exists, use it.
 - **`refactoring-patterns`** executes the named transformation (Extract Function, Combine Functions into Class) once duplication is confirmed.
 - **`reviewing-as-staff-engineer`** uses this skill's output as one of its review lenses (design regression — duplication of an existing pattern).
