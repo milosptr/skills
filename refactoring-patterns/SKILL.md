@@ -9,7 +9,7 @@ Refactoring is a structural change that does not alter observable behavior. Ever
 
 AI's natural failure mode is to "improve" code by rewriting large sections at once, which silently changes behavior, breaks tests, or both. This skill forces named, mechanical, test-guarded steps instead.
 
-The skill does not find smells — that's the job of a code review or a deliberate scan pass. It executes the fix once a smell is named.
+The skill does not find smells — that's the job of `surveying-architecture` or a code review. It executes the fix once a smell is named.
 
 ## Process
 

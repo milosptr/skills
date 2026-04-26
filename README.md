@@ -59,6 +59,15 @@ From Martin Fowler's *Refactoring* (2nd edition) and John Ousterhout's *A Philos
 
 From *The Pragmatic Programmer* and Martin Fowler's Rule of Three. DRY is about knowledge, not syntax — the most damaging AI failure mode is extracting on syntactic similarity, producing fake abstractions over unrelated code.
 
+## Improvement & Cleanup
+
+These skills find and execute architectural improvements on existing code.
+
+### surveying-architecture
+> Survey existing code for architectural problems and propose specific, named improvement opportunities — shallow modules to deepen, information leakage to hide, pass-through methods to eliminate, knowledge duplication to unify.
+
+From John Ousterhout's *A Philosophy of Software Design* and Matt Pocock's `improve-codebase-architecture`. The finder that the rest of the cleanup workflow needs.
+
 ## Verification & Review
 
 These skills close the loop before declaring work shippable.
@@ -90,6 +99,7 @@ Each skill is a folder containing a single `SKILL.md`. Place them under `~/.clau
 ├── enforcing-dry/SKILL.md
 ├── defining-done/SKILL.md
 └── reviewing-as-staff-engineer/SKILL.md
+└── surveying-architecture/SKILL.md
 ```
 
 Claude Code watches these directories and picks up new or edited skills within the current session.
