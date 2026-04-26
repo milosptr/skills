@@ -44,6 +44,7 @@ Run this before declaring any non-trivial implementation complete.
 - **Files touched outside the planned scope.** If `PLAN.md` named the affected modules, anything you touched outside that list is either a wrong plan or scope creep — flag it. If no plan exists, sanity-check the diff against the original request: are these the files a reasonable implementation would have touched?
 - **New dependencies added.** Any new package in `package.json`, `pyproject.toml`, etc. should match the plan. Surprise dependencies have license, security, and maintenance implications.
 - **Generated code modified by hand.** Anything in `generated/`, `gen/`, `*.generated.*` should not appear in your diff. If it does, you're patching something that will get overwritten.
+- **Surprise public API surface.** New exported functions, classes, types, route handlers, CLI flags, env vars, DB columns, or event payloads that aren't called for by the SPEC/PLAN (or, if no plan exists, by the stated intent of the change). Every new piece of exposed surface is a contract that callers will rely on and that you will then have to maintain — verify each one was actually asked for. Quietly widening the surface is one of the most common silent AI failure modes.
 
 ## Output format: the Done Statement
 
@@ -81,6 +82,7 @@ Produce one of these two:
 - No debug code, no commented-out blocks, no new TODOs, no type-system bypasses.
 - Files changed match `PLAN.md` scope (or, if no plan: match the scope a reasonable implementation of the request would touch).
 - No new dependencies (or: <dep> added, matches plan/request).
+- No surprise public API surface (new exports, routes, CLI flags, env vars, DB columns, event payloads) beyond what the SPEC/PLAN/request asked for.
 
 **Follow-ups (not blocking done):**
 - <issue or note for things deliberately deferred>
@@ -116,7 +118,7 @@ I have not run the Done Statement; the work is not yet complete.
 
 ## Integration with hooks
 
-For the deterministic parts of "done" — lint, format, typecheck, secret scan — pre-commit hooks are the right enforcement mechanism. They run every time and don't depend on memory. If the project doesn't have them, point at `setup-pre-commit` (Pocock's skill, or the project's existing tooling) and recommend it.
+For the deterministic parts of "done" — lint, format, typecheck, secret scan — pre-commit hooks are the right enforcement mechanism. They run every time and don't depend on memory. If the project doesn't have them, recommend setting them up using whatever tooling the project already uses (Husky, lefthook, pre-commit, lint-staged, etc.).
 
 This skill handles the *judgment* parts that hooks can't:
 - Did you implement what was actually asked for (per the SPEC if present, or per the explicit acceptance list derived from the request)?

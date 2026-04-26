@@ -9,7 +9,7 @@ Refactoring is a structural change that does not alter observable behavior. Ever
 
 AI's natural failure mode is to "improve" code by rewriting large sections at once, which silently changes behavior, breaks tests, or both. This skill forces named, mechanical, test-guarded steps instead.
 
-The skill does not find smells — that's `improve-codebase-architecture` or a code review. It executes the fix.
+The skill does not find smells — that's the job of a code review or a deliberate scan pass. It executes the fix once a smell is named.
 
 ## Process
 
@@ -100,7 +100,7 @@ Test the change: every test that exercises `processOrder` continues to pass. No 
 
 ## Anti-patterns to refuse
 
-- **"Improve this file" without a named transformation.** Refuse. Ask what specifically to improve, or run `improve-codebase-architecture` to find candidates first.
+- **"Improve this file" without a named transformation.** Refuse. Ask the user what specifically to improve, or do a deliberate review pass first to find candidates and name them — then come back here to execute.
 - **Batched refactorings without test runs between.** Refuse. The point of refactoring discipline is the green checkpoint between steps.
 - **Refactoring without tests.** If the code has no tests, you cannot verify behavior preservation. Run `characterizing-legacy` first.
 - **"Just clean it up while you're there."** Mixing a behavior change with a refactoring in the same commit means you can no longer tell which broke the test. Separate them.

@@ -61,7 +61,7 @@ test("checkout calls calculatePricing then createOrder then sendEmail", async ()
   const sendEmail = vi.spyOn(email, "sendEmail");
   await checkout("c1");
   expect(calculatePricing).toHaveBeenCalled();
-  expect(createOrder).toHaveBeenCalledOrder(2);
+  expect(createOrder).toHaveBeenCalledTimes(1);
   expect(sendEmail).toHaveBeenCalledTimes(1);
 });
 ```

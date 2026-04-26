@@ -22,7 +22,7 @@ A different skill — `defining-done` — is the implementer's self-check before
 3. **Read the diff once for shape.** What's the change at a high level? Which modules changed? Does the scope match `PLAN.md` (or, if no plan, the stated intent of the change)?
 4. **Read the diff a second time for risk.** Walk the review lenses below. For each, note specific concerns with file:line references.
 5. **Run the code mentally and operationally.** What happens under load? Under concurrent access? Under partial failure? At scale? At zero?
-6. **Check that the acceptance criteria are actually verified by the diff.** Walk the SPEC's criteria if one exists; otherwise walk the list you derived in step 2. Each criterion should map to a test or observable behavior.
+6. **Check that the acceptance criteria are actually verified by the diff.** Walk the SPEC's criteria if one exists; otherwise walk the list you derived in step 2. Produce an explicit two-column mapping — left column: the criterion verbatim; right column: the test name and file:line that proves it, or the observable behavior in the diff that demonstrates it. If the right column is empty for any row, that row is a Blocker (or "What's missing"). Don't paraphrase the criteria — copy them so a missing match is impossible to miss.
 7. **Check the diff hygiene** — debug code, TODOs, type bypasses, scope creep — same list as `defining-done`. The implementer should have caught these; the reviewer catches what slipped through.
 8. **Tag every comment by severity** (Blocker / Consideration / Nit) so the implementer can triage.
 9. **Output the review** in the format below. Be direct. Be specific. Cite file:line.

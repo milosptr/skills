@@ -87,6 +87,18 @@ Changes the user should confirm before propagating:
 - `getClientById()` → `getCustomerById()`
 ```
 
+## Multiple bounded contexts
+
+Evans is explicit: a ubiquitous language belongs to a **bounded context**, not to a project. The same word can mean different things in different contexts and that's healthy — `Customer` in billing (an entity with payment methods) is not the same `Customer` as in support (an identity with a ticket history).
+
+For small, single-context apps a project-wide `UBIQUITOUS_LANGUAGE.md` is fine. For multi-context projects (e.g., billing + auth + reporting + analytics), force the split:
+
+- One glossary per context: `docs/contexts/<context>/UBIQUITOUS_LANGUAGE.md`
+- A short root `UBIQUITOUS_LANGUAGE.md` listing the contexts and pointing at each glossary
+- A "Cross-context translations" section in the root file when the same noun maps to different concepts across contexts (e.g., billing `Customer` ↔ support `Account`)
+
+If you can't tell which context a term belongs to, that's the signal — surface it to the user as a question, don't pick silently.
+
 ## Re-running
 
 When invoked again in the same project:
